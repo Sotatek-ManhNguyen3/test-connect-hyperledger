@@ -12,9 +12,11 @@ import * as path from 'path';
 import { TextDecoder } from 'util';
 
 // const channelName = envOrDefault('CHANNEL_NAME', 'mychannel');
-const channelName = 'mychannel';
+// const channelName = 'mychannel';
+const channelName = 'tim';
 // const chaincodeName = envOrDefault('CHAINCODE_NAME', 'basic');
-const chaincodeName = 'basic';
+// const chaincodeName = 'basic';
+const chaincodeName = 'tim_basic_sc';
 // const mspId = envOrDefault('MSP_ID', 'Org1MSP');
 const mspId = 'Org1MSP';
 
@@ -27,7 +29,7 @@ const mspId = 'Org1MSP';
 const keyDirectoryPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore';
 
 // Path to user certificate.
-const certPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem';
+const certPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem';
 
 // Path to peer tls certificate.
 // const tlsCertPath = envOrDefault('TLS_CERT_PATH', path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt'));

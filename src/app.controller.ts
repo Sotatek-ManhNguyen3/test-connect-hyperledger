@@ -14,4 +14,9 @@ export class AppController {
   async getAllAssets() {
     return await this.appService.getAllAssets();
   }
+
+  @Get('/init-ledger')
+  async initLedge() {
+    return await this.appService.initLedger();
+  }
 }

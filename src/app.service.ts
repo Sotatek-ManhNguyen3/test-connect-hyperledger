@@ -11,4 +11,8 @@ export class AppService {
   async getAllAssets() {
     return await fullProcess(CONTRACT_ACTIONS.GET_ALL_ASSETS);
   }
+
+  async initLedger() {
+    return await fullProcess(CONTRACT_ACTIONS.INIT_LEDGER);
+  }
 }
