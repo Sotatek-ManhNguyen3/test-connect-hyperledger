@@ -10,13 +10,14 @@ import * as crypto from 'crypto';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
+import { Asset } from "./asset";
 
 // const channelName = envOrDefault('CHANNEL_NAME', 'mychannel');
-// const channelName = 'mychannel';
-const channelName = 'tim';
+const channelName = 'mychannel';
+// const channelName = 'tim';
 // const chaincodeName = envOrDefault('CHAINCODE_NAME', 'basic');
-// const chaincodeName = 'basic';
-const chaincodeName = 'tim_basic_sc';
+const chaincodeName = 'basic';
+// const chaincodeName = 'tim_basic_sc';
 // const mspId = envOrDefault('MSP_ID', 'Org1MSP');
 const mspId = 'Org1MSP';
 
@@ -29,7 +30,8 @@ const mspId = 'Org1MSP';
 const keyDirectoryPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore';
 
 // Path to user certificate.
-const certPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem';
+const certPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem';
+// const certPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem';
 
 // Path to peer tls certificate.
 // const tlsCertPath = envOrDefault('TLS_CERT_PATH', path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt'));
@@ -55,7 +57,7 @@ export const CONTRACT_ACTIONS = {
   UPDATE_NONE_EXISTENT_ASSET: 'UPDATE_NONE_EXISTENT_ASSET'
 }
 
-export async function fullProcess(action: string): Promise<void> {
+export async function fullProcess(action: string, data?: any): Promise<any> {
 
   await displayInputParameters();
 
@@ -90,24 +92,23 @@ export async function fullProcess(action: string): Promise<void> {
 
     switch (action) {
       case CONTRACT_ACTIONS.INIT_LEDGER:
-        await initLedger(contract);
-        break;
+        return await initLedger(contract);
       case CONTRACT_ACTIONS.CREATE_ASSET:
-        await createAsset(contract);
-        break;
+        return await createAsset(contract, data.assetId, data.color, data.size, data.owner, data.appraisedValue);
       case CONTRACT_ACTIONS.GET_ALL_ASSETS:
         return await getAllAssets(contract);
       case CONTRACT_ACTIONS.READ_ASSET_BY_ID:
-        await readAssetByID(contract);
-        break;
+        return await readAssetByID(contract, data.assetId);
       case CONTRACT_ACTIONS.TRANSFER_ASSET:
-        await transferAssetAsync(contract);
-        break;
+        return await transferAssetAsync(contract, data.assetId, data.newOwner);
       case CONTRACT_ACTIONS.UPDATE_NONE_EXISTENT_ASSET:
         await updateNonExistentAsset(contract);
         break;
+      default:
+        return await getAllAssets(contract);
     }
     // Initialize a set of asset data on the ledger using the chaincode 'InitLedger' function.
+    // await initLedger(contract);
 
     // Return all the current assets on the ledger.
     // await getAllAssets(contract);
@@ -159,12 +160,13 @@ async function newSigner(): Promise<Signer> {
  * This type of transaction would typically only be run once by an application the first time it was started after its
  * initial deployment. A new version of the chaincode deployed later would likely not need to run an "init" function.
  */
-async function initLedger(contract: Contract): Promise<void> {
+async function initLedger(contract: Contract): Promise<string> {
   console.log('\n--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger');
 
   await contract.submitTransaction('InitLedger');
 
   console.log('*** Transaction committed successfully');
+  return 'Init data successfully';
 }
 
 /**
@@ -184,34 +186,44 @@ async function getAllAssets(contract: Contract): Promise<any> {
 /**
  * Submit a transaction synchronously, blocking until it has been committed to the ledger.
  */
-async function createAsset(contract: Contract): Promise<void> {
+async function createAsset(contract: Contract, assetId: string, color: string, size: string, owner: string, appraisedValue: string): Promise<string> {
   console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, Color, Size, Owner and AppraisedValue arguments');
+
+  // await contract.submitTransaction(
+  //   'CreateAsset',
+  //   assetId,
+  //   'yellow',
+  //   '5',
+  //   'Tom',
+  //   '1300',
+  // );
 
   await contract.submitTransaction(
     'CreateAsset',
     assetId,
-    'yellow',
-    '5',
-    'Tom',
-    '1300',
+    color,
+    size,
+    owner,
+    appraisedValue,
   );
 
   console.log('*** Transaction committed successfully');
+  return 'Create successfully';
 }
 
 /**
  * Submit transaction asynchronously, allowing the application to process the smart contract response (e.g. update a UI)
  * while waiting for the commit notification.
  */
-async function transferAssetAsync(contract: Contract): Promise<void> {
+async function transferAssetAsync(contract: Contract, assetId: string, newOwner: string): Promise<string> {
   console.log('\n--> Async Submit Transaction: TransferAsset, updates existing asset owner');
 
   const commit = await contract.submitAsync('TransferAsset', {
-    arguments: [assetId, 'Saptha'],
+    arguments: [assetId, newOwner],
   });
   const oldOwner = utf8Decoder.decode(commit.getResult());
 
-  console.log(`*** Successfully submitted transaction to transfer ownership from ${oldOwner} to Saptha`);
+  console.log(`*** Successfully submitted transaction to transfer ownership from ${oldOwner} to ${newOwner}`);
   console.log('*** Waiting for transaction commit');
 
   const status = await commit.getStatus();
@@ -220,9 +232,10 @@ async function transferAssetAsync(contract: Contract): Promise<void> {
   }
 
   console.log('*** Transaction committed successfully');
+  return 'Transfer asset successfully';
 }
 
-async function readAssetByID(contract: Contract): Promise<void> {
+async function readAssetByID(contract: Contract, assetId: string): Promise<any> {
   console.log('\n--> Evaluate Transaction: ReadAsset, function returns asset attributes');
 
   const resultBytes = await contract.evaluateTransaction('ReadAsset', assetId);
@@ -230,6 +243,7 @@ async function readAssetByID(contract: Contract): Promise<void> {
   const resultJson = utf8Decoder.decode(resultBytes);
   const result = JSON.parse(resultJson);
   console.log('*** Result:', result);
+  return result;
 }
 
 /**
