@@ -49,6 +49,7 @@ There will be 5 apis:
 2. Get all assets
 3. Read asset by id
 4. Create asset
+5. Transfer asset
 
 Sample body:
 ```json
