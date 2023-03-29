@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -39,5 +39,10 @@ export class AppController {
   @Post('/transfer-asset')
   async transferAsset(@Body() data) {
     return await this.appService.transferAsset(data.assetId, data.newOwner);
+  }
+
+  @Delete('asset')
+  async deleteAsset(@Query() data) {
+    return await this.appService.deleteAsset(data.assetId);
   }
 }

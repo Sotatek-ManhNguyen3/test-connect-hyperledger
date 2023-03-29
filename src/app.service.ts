@@ -27,4 +27,8 @@ export class AppService {
   async transferAsset(assetId: string, newOwner: string) {
     return await fullProcess(CONTRACT_ACTIONS.TRANSFER_ASSET, {assetId, newOwner})
   }
+
+  async deleteAsset(assetId: string) {
+    return await fullProcess(CONTRACT_ACTIONS.DELETE_ASSET, {assetId})
+  }
 }

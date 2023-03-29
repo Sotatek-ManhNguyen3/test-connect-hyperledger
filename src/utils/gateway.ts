@@ -10,11 +10,11 @@ import * as crypto from 'crypto';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
-import { Asset } from "./asset";
+// import { Asset } from "./asset";
 
 // const channelName = envOrDefault('CHANNEL_NAME', 'mychannel');
-const channelName = 'mychannel';
-// const channelName = 'tim';
+// const channelName = 'mychannel';
+const channelName = 'tim';
 // const chaincodeName = envOrDefault('CHAINCODE_NAME', 'basic');
 const chaincodeName = 'basic';
 // const chaincodeName = 'tim_basic_sc';
@@ -27,15 +27,15 @@ const mspId = 'Org1MSP';
 
 // Path to user private key directory.
 // const keyDirectoryPath = envOrDefault('KEY_DIRECTORY_PATH', path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore'));
-const keyDirectoryPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore';
+const keyDirectoryPath = '/home/tienmanh/Documents/code/tim/tim-hyperledger/fabric/network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore';
 
 // Path to user certificate.
-const certPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/cert.pem';
+const certPath = '/home/tienmanh/Documents/code/tim/tim-hyperledger/fabric/network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem';
 // const certPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem';
 
 // Path to peer tls certificate.
 // const tlsCertPath = envOrDefault('TLS_CERT_PATH', path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt'));
-const tlsCertPath = '/home/tienmanh/Documents/code/tim/test/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt';
+const tlsCertPath = '/home/tienmanh/Documents/code/tim/tim-hyperledger/fabric/network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt';
 
 // Gateway peer endpoint.
 // const peerEndpoint = envOrDefault('PEER_ENDPOINT', 'localhost:7051');
@@ -46,7 +46,7 @@ const peerEndpoint = 'localhost:7051';
 const peerHostAlias = 'peer0.org1.example.com';
 
 const utf8Decoder = new TextDecoder();
-const assetId = `asset${Date.now()}`;
+// const assetId = `asset${Date.now()}`;
 
 export const CONTRACT_ACTIONS = {
   INIT_LEDGER: 'INIT_LEDGER',
@@ -54,7 +54,8 @@ export const CONTRACT_ACTIONS = {
   CREATE_ASSET: 'CREATE_ASSET',
   TRANSFER_ASSET: 'TRANSFER_ASSET',
   READ_ASSET_BY_ID: 'READ_ASSET_BY_ID',
-  UPDATE_NONE_EXISTENT_ASSET: 'UPDATE_NONE_EXISTENT_ASSET'
+  UPDATE_NONE_EXISTENT_ASSET: 'UPDATE_NONE_EXISTENT_ASSET',
+  DELETE_ASSET: 'DELETE_ASSET'
 }
 
 export async function fullProcess(action: string, data?: any): Promise<any> {
@@ -102,8 +103,9 @@ export async function fullProcess(action: string, data?: any): Promise<any> {
       case CONTRACT_ACTIONS.TRANSFER_ASSET:
         return await transferAssetAsync(contract, data.assetId, data.newOwner);
       case CONTRACT_ACTIONS.UPDATE_NONE_EXISTENT_ASSET:
-        await updateNonExistentAsset(contract);
-        break;
+        return await updateNonExistentAsset(contract);
+      case CONTRACT_ACTIONS.DELETE_ASSET:
+        return await deleteAssetById(contract, data.assetId);
       default:
         return await getAllAssets(contract);
     }
@@ -247,6 +249,26 @@ async function readAssetByID(contract: Contract, assetId: string): Promise<any> 
 }
 
 /**
+ * Delete asset by assetId
+ * @param contract
+ * @param assetId
+ */
+async function deleteAssetById(contract: Contract, assetId: string): Promise<any> {
+  console.log(`\n--> Submit Transaction: Delete asset with id ${assetId}`);
+
+  try {
+    await contract.submitTransaction(
+      'DeleteAsset',
+      assetId
+    )
+
+    return `Delete asset ${assetId} successfully`
+  } catch (error) {
+    console.log('*** Successfully caught the error: \n', error);
+  }
+}
+
+/**
  * submitTransaction() will throw an error containing details of any error responses from the smart contract.
  */
 async function updateNonExistentAsset(contract: Contract): Promise<void>{
@@ -270,9 +292,9 @@ async function updateNonExistentAsset(contract: Contract): Promise<void>{
 /**
  * envOrDefault() will return the value of an environment variable, or a default value if the variable is undefined.
  */
-function envOrDefault(key: string, defaultValue: string): string {
-  return process.env[key] || defaultValue;
-}
+// function envOrDefault(key: string, defaultValue: string): string {
+//   return process.env[key] || defaultValue;
+// }
 
 /**
  * displayInputParameters() will print the global scope parameters used by the main driver routine.
